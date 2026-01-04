@@ -246,11 +246,11 @@
             pixKey: "3e75021a-5e25-476a-a4ca-7654733ced14",
             pixName: "Mamãe e Papai",
             // Deixe vazio para gerar automaticamente
-            customQrCode: "" 
+            customQrCode: 'data/qrcode.png'
         };
 
         // Estado inicial
-        let votes = { girl: 12, boy: 8 };
+        let votes = { girl: 6, boy: 6 };
         let userVoted = null; // 'girl', 'boy' ou null
 
         // --- 2. INICIALIZAÇÃO ---
@@ -302,10 +302,10 @@
             document.getElementById('bar-boy').style.width = `${boyPercent}%`;
 
             // Atualizar textos
-            document.getElementById('percent-girl').innerText = `${girlPercent}%`;
-            document.getElementById('percent-boy').innerText = `${boyPercent}%`;
-            document.getElementById('count-girl').innerText = `${votes.girl} votos`;
-            document.getElementById('count-boy').innerText = `${votes.boy} votos`;
+            document.getElementById('percent-girl').innerText = `???%`;
+            document.getElementById('percent-boy').innerText = `???%`;
+            document.getElementById('count-girl').innerText = `??? votos`;
+            document.getElementById('count-boy').innerText = `??? votos`;
 
             // Gerenciar estado visual de votado
             const girlContainer = document.getElementById('vote-girl-container');
