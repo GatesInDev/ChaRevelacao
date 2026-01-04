@@ -12,6 +12,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
 
+        body {
+            user-select: none;
+        }
+
         .font-handwriting {
             font-family: 'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', 'Marker Felt', sans-serif;
         }
@@ -250,7 +254,7 @@
         };
 
         // Estado inicial
-        let votes = { girl: 6, boy: 6 };
+        let votes = { girl: 12, boy: 12 };
         let userVoted = null; // 'girl', 'boy' ou null
 
         // --- 2. INICIALIZAÇÃO ---
@@ -302,8 +306,8 @@
             document.getElementById('bar-boy').style.width = `${boyPercent}%`;
 
             // Atualizar textos
-            document.getElementById('percent-girl').innerText = `???%`;
-            document.getElementById('percent-boy').innerText = `???%`;
+            document.getElementById('percent-girl').innerText = `${girlPercent}%`;
+            document.getElementById('percent-boy').innerText = `${boyPercent}%`;
             document.getElementById('count-girl').innerText = `??? votos`;
             document.getElementById('count-boy').innerText = `??? votos`;
 
