@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chá Revelação - Dandara e Salomão</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
+
+        .font-handwriting {
+            font-family: 'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', 'Marker Felt', sans-serif;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(0px) translateY(0px); }
+            50% { transform: translateX(20px) translateY(-10px); }
+            100% { transform: translateX(0px) translateY(0px); }
+        }
+
+        .animate-float { animation: float 20s infinite linear; }
+        .animate-float-reverse { animation: float 25s infinite linear reverse; }
+        .animate-float-slow { animation: float 30s infinite linear; }
+        
+        /* Utilitários de transição para o JS */
+        .hidden-modal { display: none !important; }
+        .fade-in-enter { opacity: 0; transform: translateY(40px); }
+        .fade-in-active { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body class="min-h-screen bg-amber-50 relative overflow-hidden font-sans selection:bg-pink-200 selection:text-pink-900">
+
+    <div class="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,_#fce7f3_0%,_transparent_40%)]"></div>
+        <div class="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_bottom_right,_#e0f2fe_0%,_transparent_40%)]"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(#d1d5db 1px, transparent 1px); background-size: 30px 30px;"></div>
+    </div>
+
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="animate-float absolute top-10 left-[-50px] md:left-10 text-pink-200 opacity-60">
+            <svg viewBox="0 0 24 24" class="w-24 h-24" fill="currentColor"><path d="M17.5,19c-3.037,0-5.5-2.463-5.5-5.5c0-0.41,0.046-0.811,0.133-1.199C11.58,12.124,11.053,12,10.5,12 c-2.485,0-4.5,2.015-4.5,4.5s2.015,4.5,4.5,4.5h7c2.485,0,4.5-2.015,4.5-4.5S19.985,12,17.5,12c-0.194,0-0.385,0.016-0.572,0.046 C16.639,8.599,13.623,6,10,6c-4.418,0-8,3.582-8,8c0,4.418,3.582,8,8,8h7.5c0,0,0,0,0,0z" opacity="0.9"/></svg>
+        </div>
+        <div class="animate-float-reverse absolute top-40 right-[-50px] md:right-10 text-blue-200 opacity-60">
+            <svg viewBox="0 0 24 24" class="w-32 h-32" fill="currentColor"><path d="M17.5,19c-3.037,0-5.5-2.463-5.5-5.5c0-0.41,0.046-0.811,0.133-1.199C11.58,12.124,11.053,12,10.5,12 c-2.485,0-4.5,2.015-4.5,4.5s2.015,4.5,4.5,4.5h7c2.485,0,4.5-2.015,4.5-4.5S19.985,12,17.5,12c-0.194,0-0.385,0.016-0.572,0.046 C16.639,8.599,13.623,6,10,6c-4.418,0-8,3.582-8,8c0,4.418,3.582,8,8,8h7.5c0,0,0,0,0,0z" opacity="0.9"/></svg>
+        </div>
+    </div>
+
+    <div id="modal-pix" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity duration-300 hidden-modal opacity-0">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm relative shadow-2xl transform transition-all scale-95" id="modal-content">
+            <button onclick="toggleModal(false)" class="absolute top-4 right-4 p-1 bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-colors">
+                <i data-lucide="x" width="20"></i>
+            </button>
+            
+            <div class="text-center pt-2">
+                <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm animate-bounce">
+                    <i data-lucide="qr-code" class="text-green-600" width="32"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 font-handwriting mb-2">Presente Virtual</h3>
+                <p class="text-gray-500 text-sm mb-6 leading-relaxed px-4">
+                    Agradecemos o carinho! <br/>Use o QR Code ou a chave abaixo.
+                </p>
+                
+                <div class="bg-white p-2 rounded-xl mb-6 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center shadow-inner mx-4">
+                    <img id="qr-code-img" src="" alt="QR Code Pix" class="w-40 h-40 object-contain" />
+                    <span class="text-xs text-gray-400 mt-2 font-mono">Scan Me</span>
+                </div>
+
+                <div class="bg-gray-50 p-3 rounded-xl flex items-center justify-between border border-gray-200 mb-2 mx-2">
+                    <div class="flex flex-col items-start overflow-hidden text-left">
+                        <span class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Chave Pix</span>
+                        <span id="pix-key-display" class="text-gray-700 font-mono text-sm truncate w-full max-w-[180px]"></span>
+                    </div>
+                    <button onclick="copyPix()" class="ml-2 bg-white text-green-600 p-2 rounded-lg shadow-sm border border-gray-100 hover:bg-green-50 active:scale-95 transition-all flex-shrink-0">
+                        <i id="icon-copy-pix" data-lucide="copy" width="18"></i>
+                        <i id="icon-check-pix" data-lucide="check-circle" width="18" class="hidden"></i>
+                    </button>
+                </div>
+                
+                <p id="feedback-pix" class="text-xs text-green-600 font-bold h-4 transition-opacity opacity-0">
+                    Chave copiada com sucesso!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-card" class="relative z-10 max-w-lg mx-auto min-h-screen flex flex-col items-center justify-center p-4 transition-all duration-1000 fade-in-enter">
+        
+        <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-3xl p-6 md:p-8 w-full border-4 border-white ring-1 ring-gray-100 relative overflow-hidden">
+            
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300"></div>
+
+            <button onclick="handleShare()" class="absolute top-4 right-4 text-gray-400 hover:text-pink-500 transition-colors p-2 rounded-full hover:bg-pink-50" title="Partilhar Convite">
+                <i data-lucide="share-2" width="20"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <h1 id="event-title" class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight font-handwriting mb-2 drop-shadow-sm">
+                    Chá Revelação
+                </h1>
+                <p class="text-gray-500 text-sm uppercase tracking-widest font-semibold">Dê o seu palpite!</p>
+            </div>
+
+            <div class="flex flex-col items-center justify-center mb-8 relative">
+                
+                <div class="w-full h-2 bg-gray-200 rounded-full mb-6 overflow-hidden flex">
+                    <div id="bar-girl" class="h-full bg-pink-400 transition-all duration-1000" style="width: 50%"></div>
+                    <div id="bar-boy" class="h-full bg-blue-400 transition-all duration-1000" style="width: 50%"></div>
+                </div>
+
+                <div class="flex items-end justify-center w-full gap-2 md:gap-6">
+                    
+                    <div id="vote-girl-container" onclick="handleVote('girl')" class="flex flex-col items-center cursor-pointer group transition-all duration-300 hover:scale-105">
+                        <div class="mb-2 bg-pink-100 text-pink-600 font-bold px-3 py-1 rounded-full shadow-sm border border-pink-200 text-sm flex items-center gap-1 animate-bounce">
+                            <span id="percent-girl">50%</span>
+                            <i id="check-girl" data-lucide="check-circle" width="12" class="hidden"></i>
+                        </div>
+
+                        <div class="relative">
+                            <div class="absolute inset-0 bg-pink-200 rounded-full blur-xl opacity-50 group-hover:opacity-80 transition-opacity"></div>
+                            <svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28 relative z-10 drop-shadow-lg" fill="none">
+                                <circle cx="25" cy="25" r="12" fill="#D2B48C" />
+                                <circle cx="75" cy="25" r="12" fill="#D2B48C" />
+                                <circle cx="25" cy="25" r="8" fill="#FFE4E1" />
+                                <circle cx="75" cy="25" r="8" fill="#FFE4E1" />
+                                <circle cx="50" cy="50" r="35" fill="#D2B48C" />
+                                <ellipse cx="50" cy="58" rx="14" ry="10" fill="#FFF8F0" />
+                                <ellipse cx="50" cy="54" rx="5" ry="3" fill="#5D4037" />
+                                <circle cx="40" cy="45" r="3" fill="#3E2723" />
+                                <circle cx="60" cy="45" r="3" fill="#3E2723" />
+                                <circle cx="30" cy="55" r="4" fill="#FFB6C1" opacity="0.6" />
+                                <circle cx="70" cy="55" r="4" fill="#FFB6C1" opacity="0.6" />
+                            </svg>
+                            <div class="absolute -right-2 -top-2 bg-pink-400 text-white p-1.5 rounded-full shadow-md z-20 transition-transform">
+                                <i id="thumb-girl" data-lucide="thumbs-up" width="16"></i>
+                            </div>
+                        </div>
+                        <h2 id="name-girl" class="text-2xl md:text-3xl font-bold text-pink-500 mt-3 font-handwriting">Dandara</h2>
+                        <span id="count-girl" class="text-xs text-pink-400 mt-1 font-semibold">12 votos</span>
+                    </div>
+
+                    <div class="text-gray-300 font-bold text-xl italic pb-12">ou</div>
+
+                    <div id="vote-boy-container" onclick="handleVote('boy')" class="flex flex-col items-center cursor-pointer group transition-all duration-300 hover:scale-105">
+                        <div class="mb-2 bg-blue-100 text-blue-600 font-bold px-3 py-1 rounded-full shadow-sm border border-blue-200 text-sm flex items-center gap-1 animate-bounce">
+                            <span id="percent-boy">50%</span>
+                            <i id="check-boy" data-lucide="check-circle" width="12" class="hidden"></i>
+                        </div>
+
+                        <div class="relative">
+                            <div class="absolute inset-0 bg-blue-200 rounded-full blur-xl opacity-50 group-hover:opacity-80 transition-opacity"></div>
+                            <svg viewBox="0 0 100 100" class="w-24 h-24 md:w-28 md:h-28 relative z-10 drop-shadow-lg" fill="none">
+                                <circle cx="25" cy="25" r="12" fill="#D2B48C" />
+                                <circle cx="75" cy="25" r="12" fill="#D2B48C" />
+                                <circle cx="25" cy="25" r="8" fill="#FFE4E1" />
+                                <circle cx="75" cy="25" r="8" fill="#FFE4E1" />
+                                <circle cx="50" cy="50" r="35" fill="#D2B48C" />
+                                <ellipse cx="50" cy="58" rx="14" ry="10" fill="#FFF8F0" />
+                                <ellipse cx="50" cy="54" rx="5" ry="3" fill="#5D4037" />
+                                <circle cx="40" cy="45" r="3" fill="#3E2723" />
+                                <circle cx="60" cy="45" r="3" fill="#3E2723" />
+                                <circle cx="30" cy="55" r="4" fill="#FFB6C1" opacity="0.6" />
+                                <circle cx="70" cy="55" r="4" fill="#FFB6C1" opacity="0.6" />
+                            </svg>
+                            <div class="absolute -left-2 -top-2 bg-blue-400 text-white p-1.5 rounded-full shadow-md z-20 transition-transform">
+                                <i id="thumb-boy" data-lucide="thumbs-up" width="16"></i>
+                            </div>
+                        </div>
+                        <h2 id="name-boy" class="text-2xl md:text-3xl font-bold text-blue-500 mt-3 font-handwriting">Salomão</h2>
+                        <span id="count-boy" class="text-xs text-blue-400 mt-1 font-semibold">8 votos</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
+                <div class="bg-pink-50 p-3 md:p-4 rounded-2xl flex flex-col items-center justify-center text-center border border-pink-100">
+                    <i data-lucide="calendar" class="text-pink-500 mb-2" width="20"></i>
+                    <span id="date-day" class="text-lg md:text-2xl font-bold text-gray-800">17</span>
+                    <span id="date-month" class="text-pink-600 text-xs md:text-sm font-medium uppercase">de Janeiro</span>
+                </div>
+                <div class="bg-blue-50 p-3 md:p-4 rounded-2xl flex flex-col items-center justify-center text-center border border-blue-100">
+                    <i data-lucide="clock" class="text-blue-500 mb-2" width="20"></i>
+                    <span id="time-hour" class="text-lg md:text-2xl font-bold text-gray-800">19:00</span>
+                    <span class="text-blue-600 text-xs md:text-sm font-medium uppercase">Horas</span>
+                </div>
+            </div>
+
+            <div class="text-center space-y-5">
+                <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-100 text-sm md:text-base">
+                    <p id="event-message" class="text-gray-700 font-medium">
+                        🎨 Venha com um item da cor do seu palpite!
+                    </p>
+                </div>
+
+                <div class="space-y-1">
+                    <div class="flex items-center justify-center text-gray-600 font-semibold gap-2 text-sm md:text-base">
+                        <i data-lucide="map-pin" class="text-purple-500" width="18"></i>
+                        <span id="location-name">Casa de Bispinho</span>
+                    </div>
+                    
+                    <div class="flex flex-col items-center justify-center gap-2">
+                        <button onclick="copyAddress()" class="flex items-center gap-2 text-gray-500 text-xs md:text-sm hover:text-purple-600 transition-colors border-b border-dashed border-gray-400 hover:border-purple-600 pb-0.5">
+                            <span id="location-address">Rua Damasco Cruz, 110</span>
+                            <i data-lucide="copy" width="12"></i>
+                        </button>
+                        
+                        <div id="feedback-address" class="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full transition-all duration-300 transform opacity-0 -translate-y-2 pointer-events-none">
+                            Endereço copiado! ✨
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                    <button onclick="handleConfirm()" class="w-full bg-gradient-to-r from-pink-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transform transition hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle" width="20"></i>
+                        <span class="text-sm md:text-base">Confirmar Presença</span>
+                    </button>
+
+                    <button onclick="toggleModal(true)" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transform transition hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2">
+                        <i data-lucide="gift" width="20"></i>
+                        <span class="text-sm md:text-base">Enviar Mimo (Pix)</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        
+        <p class="mt-8 text-gray-500 text-sm font-handwriting">Esperamos vocês com muito amor! ❤️</p>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURAÇÃO DOS DADOS ---
+        const config = {
+            title: "Chá Revelação",
+            girlName: "Dandara",
+            boyName: "Salomão",
+            date: "17 de Janeiro",
+            time: "19:00 horas",
+            locationName: "Casa de Bispinho",
+            address: "Rua Damasco Cruz, 110",
+            message: "Venha com um item da cor do seu palpite!",
+            whatsappNumber: "557381488789",
+            pixKey: "3e75021a-5e25-476a-a4ca-7654733ced14",
+            pixName: "Mamãe e Papai",
+            // Deixe vazio para gerar automaticamente
+            customQrCode: "" 
+        };
+
+        // Estado inicial
+        let votes = { girl: 12, boy: 8 };
+        let userVoted = null; // 'girl', 'boy' ou null
+
+        // --- 2. INICIALIZAÇÃO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar ícones
+            lucide.createIcons();
+            
+            // Preencher dados na tela
+            document.getElementById('event-title').innerText = config.title;
+            document.getElementById('name-girl').innerText = config.girlName;
+            document.getElementById('name-boy').innerText = config.boyName;
+            
+            // Data e Hora
+            const dateParts = config.date.split(' ');
+            document.getElementById('date-day').innerText = dateParts[0];
+            document.getElementById('date-month').innerText = dateParts.slice(1).join(' ');
+            
+            const timeParts = config.time.split(':');
+            document.getElementById('time-hour').innerText = timeParts[0] + ":" + timeParts[1].split(' ')[0];
+
+            document.getElementById('event-message').innerText = `🎨 ${config.message}`;
+            document.getElementById('location-name').innerText = config.locationName;
+            document.getElementById('location-address').innerText = config.address;
+            
+            // Configurar PIX
+            document.getElementById('pix-key-display').innerText = config.pixKey;
+            const qrUrl = config.customQrCode || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=3e75021a-5e25-476a-a4ca-7654733ced14`;
+            document.getElementById('qr-code-img').src = qrUrl;
+
+            // Atualizar UI de votos inicial
+            updateVotesUI();
+
+            // Animação de entrada
+            setTimeout(() => {
+                const card = document.getElementById('main-card');
+                card.classList.remove('fade-in-enter');
+                card.classList.add('fade-in-active');
+            }, 100);
+        });
+
+        // --- 3. LÓGICA DE VOTAÇÃO ---
+        function updateVotesUI() {
+            const total = votes.girl + votes.boy;
+            const girlPercent = total === 0 ? 50 : Math.round((votes.girl / total) * 100);
+            const boyPercent = total === 0 ? 50 : Math.round((votes.boy / total) * 100);
+
+            // Atualizar barras
+            document.getElementById('bar-girl').style.width = `${girlPercent}%`;
+            document.getElementById('bar-boy').style.width = `${boyPercent}%`;
+
+            // Atualizar textos
+            document.getElementById('percent-girl').innerText = `${girlPercent}%`;
+            document.getElementById('percent-boy').innerText = `${boyPercent}%`;
+            document.getElementById('count-girl').innerText = `${votes.girl} votos`;
+            document.getElementById('count-boy').innerText = `${votes.boy} votos`;
+
+            // Gerenciar estado visual de votado
+            const girlContainer = document.getElementById('vote-girl-container');
+            const boyContainer = document.getElementById('vote-boy-container');
+
+            if (userVoted === 'girl') {
+                // Selecionou MENINA
+                girlContainer.classList.remove('opacity-50', 'grayscale');
+                boyContainer.classList.add('opacity-50', 'grayscale');
+                boyContainer.classList.remove('hover:scale-105');
+                
+                // Ícones
+                document.getElementById('check-girl').classList.remove('hidden');
+                document.getElementById('thumb-girl').parentElement.innerHTML = '<i data-lucide="check-circle" width="16"></i>';
+                
+            } else if (userVoted === 'boy') {
+                // Selecionou MENINO
+                boyContainer.classList.remove('opacity-50', 'grayscale');
+                girlContainer.classList.add('opacity-50', 'grayscale');
+                girlContainer.classList.remove('hover:scale-105');
+
+                // Ícones
+                document.getElementById('check-boy').classList.remove('hidden');
+                document.getElementById('thumb-boy').parentElement.innerHTML = '<i data-lucide="check-circle" width="16"></i>';
+            }
+            
+            // Recriar ícones novos inseridos via innerHTML
+            lucide.createIcons();
+        }
+
+        function handleVote(type) {
+            if (userVoted) return; // Só permite votar uma vez
+
+            votes[type]++;
+            userVoted = type;
+            updateVotesUI();
+        }
+
+        // --- 4. AÇÕES (COMPARTILHAR, CONFIRMAR, COPIAR) ---
+
+        function handleConfirm() {
+            const palpite = userVoted === 'girl' ? config.girlName : userVoted === 'boy' ? config.boyName : "Indeciso";
+            const text = `Olá! Confirmo minha presença no Chá Revelação! Meu palpite é: ${palpite} 🐻`;
+            window.open(`https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        async function handleShare() {
+            const shareData = {
+                title: config.title,
+                text: `Olá! Vem dar o teu palpite no Chá Revelação de ${config.girlName} e ${config.boyName}! 🐻`,
+                url: window.location.href
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    console.log('Cancelado ou erro no share');
+                }
+            } else {
+                copyToClipboard(window.location.href);
+                alert("Link copiado para a área de transferência!");
+            }
+        }
+
+        function copyAddress() {
+            copyToClipboard(config.address);
+            const feedback = document.getElementById('feedback-address');
+            feedback.classList.remove('opacity-0', '-translate-y-2');
+            setTimeout(() => {
+                feedback.classList.add('opacity-0', '-translate-y-2');
+            }, 2000);
+        }
+
+        function copyPix() {
+            copyToClipboard(config.pixKey);
+            const feedback = document.getElementById('feedback-pix');
+            const iconCopy = document.getElementById('icon-copy-pix');
+            const iconCheck = document.getElementById('icon-check-pix');
+
+            // Feedback visual
+            feedback.classList.remove('opacity-0');
+            iconCopy.classList.add('hidden');
+            iconCheck.classList.remove('hidden');
+
+            setTimeout(() => {
+                feedback.classList.add('opacity-0');
+                iconCopy.classList.remove('hidden');
+                iconCheck.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Função utilitária de cópia
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text);
+            } else {
+                // Fallback para navegadores antigos/inseguros
+                let textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // --- 5. MODAL CONTROL ---
+        function toggleModal(show) {
+            const modal = document.getElementById('modal-pix');
+            const content = document.getElementById('modal-content');
+            
+            if (show) {
+                modal.classList.remove('hidden-modal');
+                // Pequeno delay para permitir a transição CSS funcionar
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden-modal');
+                }, 300); // Espera a animação de opacidade acabar
+            }
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('modal-pix').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-pix') {
+                toggleModal(false);
+            }
+        });
+
+    </script>
+</body>
+</html>
